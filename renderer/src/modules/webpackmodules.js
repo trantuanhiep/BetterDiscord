@@ -276,3 +276,22 @@ export default class WebpackModules {
     }
 
 }
+
+export const ModulePromise = new Promise(resolve => {
+    const Dispatcher = WebpackModules.getByProps("dirtyDispatch");
+    const UserStore = WebpackModules.getByProps("getCurrentUser");
+    let shouldUnsubscribe = true;
+
+    const callback = function () {
+        if (shouldUnsubscribe) Dispatcher.unsubscribe("CONNECTION_OPEN", callback);
+        resolve();
+    };
+
+    if (UserStore && !UserStore.getCurrentUser()) {
+        Dispatcher.subscribe("CONNECTION_OPEN", callback);
+    }
+    else {
+        shouldUnsubscribe = false;
+        callback();
+    }
+});
